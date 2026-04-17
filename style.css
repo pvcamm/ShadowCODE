@@ -324,3 +324,7 @@ input:focus {
 .error-shake {
     animation: shake 0.2s ease-in-out 2;
 }
+
+@media (max-width: 600px) {
+    /* Aquí van los ajustes para el celular */
+}

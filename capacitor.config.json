@@ -1,0 +1,6 @@
+{
+  "appId": "com.shadowcode.app",
+  "appName": "ShadowCODE",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

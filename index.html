@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowCODE</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body>
+    <div class="audio-controls">
+     <button id="mute-btn" class="btn-mute">🔊</button>
+    </div>
+
+    <audio id="bg-music" loop></audio>
+    <audio id="alarm-sound" loop></audio>
+
+    <div class="scanline"></div>
+    <div id="overlay" class="hidden"></div>
+
+    <div id="main-menu" class="terminal-main">
+        <h1 class="dynamic-title">SHADOW CODE</h1>
+    <div class="streak-container">
+        <div class="streak-header">RÉCORD DE SISTEMA:</div>
+    <div class="streak-content">
+        <span class="streak-label">RACHA ACTUAL:</span>
+        <span id="streak-count" class="streak-value">0</span>
+    </div>
+    <div class="streak-footer"style="color:#ff852d">MÁXIMO NIVEL ALCANZADO</div>
+    </div>
+        <div class="glass-panel">
+            <p class="system-status">SELECCIONE NIVEL DE INFILTRACIÓN</p>
+            <div class="menu-options">
+                <button class="btn-shadow" onclick="startGame('easy')">
+                    MODO CADETE <span class="lvl-tag lvl-easy">EASY</span>
+                </button>
+                <button class="btn-shadow" onclick="startGame('medium')">
+                    MODO AGENTE <span class="lvl-tag lvl-medium">MEDIUM</span>
+                </button>
+                <button class="btn-shadow" onclick="startGame('hard')">
+                    MODO NETRUNNER <span class="lvl-tag lvl-hard">HARD</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="terminal-main hidden">
+        <header>
+            <h2 id="game-title">SESSION ACTIVE</h2>
+            <p id="game-status" class="system-status">ESTADO: ESPERANDO HACKEO...</p>
+        </header>
+
+        <div id="board"></div>  
+
+        <div class="input-area">
+            <input type="text" id="user-guess" maxlength="5" placeholder="CÓDIGO..." autocomplete="off">
+            <button id="execute-btn" class="btn-shadow">EJECUTAR PROTOCOLO</button>
+        </div>
+
+        <footer class="terminal-stats">
+            <p>TIME: <span id="timer">60</span>s</p>
+            <button id="back-btn" class="btn-abort">ABORTAR MISION</button>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

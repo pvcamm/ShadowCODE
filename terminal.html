@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowCODE | Terminal de Infiltración</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    /* === CYBERPUNK MODE SELECTION - FULL SYNC CON LANDING === */
+    .mode-screen {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at 50% 30%, #1a0b2e 0%, #0a001f 70%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 10; color: #fff; font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* TÍTULO DINÁMICO CON GLITCH (igual que landing) */
+    .mode-screen h1.glitch {
+      font-size: 2.6rem; letter-spacing: 6px; text-transform: uppercase;
+      text-shadow: 0 0 20px #c026d3;
+      animation: glitch-text 1.2s infinite linear alternate;
+    }
+
+    @keyframes glitch-text {
+      0% { text-shadow: 2px 0 #c026d3, -2px 0 hsla(0, 100%, 50%, 0.856); }
+      15% { text-shadow: -2px 0 #c026d3, 2px 0 #0a0475; }
+      30% { text-shadow: 2px 0 #c026d3, -2px 0 #ff0101; }
+      45% { text-shadow: -2px 0 #c026d3, 2px 0 #8d0303; }
+      60% { text-shadow: 3px 0 #c026d3, -3px 0 #1500ff; }
+      100% { text-shadow: 2px 0 #c026d3, -2px 0 #6a00ff; }
+    }
+
+    .mode-screen .subtitle {
+      font-size: 1.1rem; opacity: 0.75; letter-spacing: 3px; margin-bottom: 40px;
+    }
+
+    .mode-grid {
+      display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; justify-content: center; max-width: 1020px;
+    }
+
+    .mode-btn {
+      background: rgba(194,38,211,0.08); border: 2px solid #c026d3; color: #fff;
+      padding: 32px 48px; border-radius: 16px; font-size: 1.4rem; text-align: center;
+      min-width: 280px; transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+      box-shadow: 0 0 25px rgba(194,38,211,0.4); text-transform: uppercase; letter-spacing: 2px;
+      position: relative;
+    }
+
+    /* EFECTO NEON PULSE EN BOTONES */
+    .mode-btn::before {
+      content: ''; position: absolute; inset: 0; border-radius: 16px;
+      box-shadow: 0 0 25px currentColor; opacity: 0; transition: opacity 0.3s;
+    }
+    .mode-btn:hover::before { opacity: 1; }
+
+    .mode-btn:hover {
+      transform: translateY(-10px) scale(1.06);
+      box-shadow: 0 0 45px currentColor;
+    }
+
+    /* COLORES POR DIFICULTAD */
+    .mode-btn.junior .label { color: #00ff2a; text-shadow: 0 0 12px #00ff2a; }
+    .mode-btn.agent .label { color: #ffe600; text-shadow: 0 0 12px #ffe600; }
+    .mode-btn.netrunner .label { color: #ff0000; text-shadow: 0 0 12px #ff0000; }
+
+    .mode-btn.junior:hover { border-color: #00ff2a; color: #00ff2a; }
+    .mode-btn.agent:hover { border-color: #ffe600; color: #ffe600; }
+    .mode-btn.netrunner:hover { border-color: #ff0000; color: #ff0000; }
+
+    .mode-btn .label {
+      display: block; font-size: 1rem; margin-top: 8px; opacity: 0.9; letter-spacing: 3px;
+    }
+
+    /* BOTÓN ABORTAR - HOVER OSCURO/ROJO INTENSO */
+    .abort-bar button {
+      margin-top: 70px; background: transparent; border: 2px solid #900404;
+      color: #900404; padding: 16px 42px; font-size: 1.1rem; border-radius: 9999px;
+      transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .abort-bar button:hover {
+      background: #ff4d4d; color: #0a001f; box-shadow: 0 0 30px #ff4d4d;
+      transform: scale(1.08);
+    }
+
+    /* GAME SCREEN */
+    #game-screen {
+      position: fixed; inset: 0; background: radial-gradient(circle at 50% 30%, #1a0b2e 0%, #0a001f 70%);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; font-family: 'Space Grotesk', sans-serif; padding: 20px;
+    }
+    #game-screen.active { display: flex; }
+  </style>
+</head>
+
+
+<body>
+  <div class="overlay-glow"></div>
+  <div class="scanline"></div>
+
+  <!-- Audio controls (mantengo tu script original) -->
+  <div class="audio-controls" style="position:fixed; top:20px; right:20px; z-index:9999;">
+    <button id="mute-btn" class="btn-mute" style="background:rgba(0,0,0,0.7); border:1px solid #1a0b2e; color: #fff; padding:10px 14px; border-radius:50%; font-size:0.8rem;">🔊</button>
+  </div>
+  <audio id="bg-music" loop></audio>
+  <audio id="alarm-sound" loop></audio>
+
+  <!-- === PANTALLA DE SELECCIÓN  === -->
+  <div id="mode-selection" class="mode-screen">
+    <div class="terminal-title">
+      <h1 class="glitch"data-text="SELECCIONE NIVEL DE INFILTRACIÓN">SELECCIONE NIVEL DE INFILTRACIÓN</h1>
+      <h2 class="subtitle">Elige tu rol. El sistema no perdona errores.</h2>
+    </div>
+    
+    <div class="menu-buttons">
+      <button class="mode-btn junior" data-diff="easy" onclick="startGame('easy')">
+        MODO JUNIOR<br>
+        <span class="label">EASY • 90s</span>
+      </button>
+      <button class="mode-btn agent" data-diff="medium" onclick="startGame('medium')">
+        MODO AGENTE<br>
+        <span class="label">MEDIUM • 60s</span>
+      </button>
+      <button class="mode-btn netrunner" data-diff="hard" onclick="startGame('hard')">
+        MODO NETRUNNER<br>
+        <span class="label">HARD • 30s</span>
+      </button>
+    </div>
+    
+    <div class="abort-bar">
+      <button onclick="window.location.href='index.html'" class="btn-ghost">ABORTAR OPERACIÓN</button>
+    </div>
+  </div>
+
+  <!-- === PANTALLA DE JUEGO === -->
+  <div id="game-screen">
+    <div class="game-bg-grid"></div>
+    <div class="particles" id="particles"></div>
+    <div class="game-container">
+
+      <!-- Cabecera: TIME | MODO | SESSION -->
+      <div class="game-header">
+        <div class="time-box">
+          <div class="time-label">TIME</div>
+          <div class="time-value"><span id="timer">90</span> <span class="secs">SECS</span></div>
+        </div>
+        <div class="mode-box">
+          <h2 id="game-mode-title" class="game-title">MODO</h2>
+        </div>
+        <div class="session-box">
+          <div class="session-active">SESSION ACTIVE</div>
+          <div id="game-status" class="session-state">Estado: Operando Hackeo</div>
+        </div>
+      </div>
+
+      <!-- Tablero de letras (Wordle) -->
+      <div id="board" class="game-board"></div>
+
+      <!-- Área de comandos -->
+      <div class="command-area">
+        <input type="text" id="user-guess" placeholder="INGRESE COMANDO" class="command-input" autocomplete="off">
+        <div class="action-buttons">
+          <button id="execute-btn" class="btn-execute">EJECUTAR</button>
+          <button id="back-btn" class="btn-abort">ABORTAR</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="overlay" class="hidden"></div>
+
+  <script src="terminal-script.js"></script>
+</body>
+</html>
+

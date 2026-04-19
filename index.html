@@ -1,68 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShadowCODE</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="logo.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowCODE | Official Site</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="audio-controls">
-     <button id="mute-btn" class="btn-mute">🔊</button>
+  <div class="overlay-glow"></div>
+  <div class="scanline"></div>
+
+  <div class="audio-controls">
+    <button id="mute-btn" class="btn-mute">🔊</button>
+  </div>
+  <audio id="bg-music" loop></audio>
+  <audio id="alarm-sound" loop></audio>
+
+  <div id="overlay" class="hidden"></div>
+
+  <header>
+    <nav>
+      <div class="logo">Shadow<span>CODE</span></div>
+      <ul class="nav-links">
+        <li><a href="#inicio">Home</a></li>
+        <li><a href="#features">Características</a></li>
+        <li><a href="terminal.html" class="play-link">JUGAR</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="inicio" class="hero">
+    <div class="hero-content">
+      <span class="badge">PROYECTO UNERG 2026</span>
+      <h1>SHADOW<br><span class="glitch">CODE</span></h1>
+      <p class="tagline">Sobrevive a la ejecución.<br>Depura tu destino.</p>
+      <div class="hero-btns">
+        <a href="terminal.html" class="btn-primary">INICIAR OPERACIÓN</a>
+        <a href="#features" class="btn-secondary">SABER MÁS</a>
+      </div>
     </div>
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>
+  </section>
 
-    <audio id="bg-music" loop></audio>
-    <audio id="alarm-sound" loop></audio>
-
-    <div class="scanline"></div>
-    <div id="overlay" class="hidden"></div>
-
-    <div id="main-menu" class="terminal-main">
-        <h1 class="dynamic-title">SHADOW CODE</h1>
-    <div class="streak-container">
-        <div class="streak-header">RÉCORD DE SISTEMA:</div>
-    <div class="streak-content">
-        <span class="streak-label">RACHA ACTUAL:</span>
-        <span id="streak-count" class="streak-value">0</span>
+  <section id="features" class="features-section">
+    <div class="features-container">
+      <div class="feature-card">
+        <div class="icon">💻</div>
+        <h3>Core Engine</h3>
+        <p>Optimizado para alto rendimiento en web y dispositivos móviles.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🛡️</div>
+        <h3>Seguridad</h3>
+        <p>Implementación de lógica de colisiones avanzada y gestión de estados.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🎨</div>
+        <h3>Estética Morada</h3>
+        <p>Interfaz diseñada bajo estándares de UX moderna con tonos Deep Purple.</p>
+      </div>
     </div>
-    <div class="streak-footer"style="color:#ff852d">MÁXIMO NIVEL ALCANZADO</div>
+  </section>
+
+  <footer id="nosotros">
+    <div class="footer-content">
+      <p class="author">Diseñado y Programado por <strong>Paola Camaripano</strong></p>
+      <p class="university">Universidad Nacional Experimental Rómulo Gallegos</p>
+      <p class="copyright">© 2026 ShadowCODE - Todos los derechos reservados.</p>
     </div>
-        <div class="glass-panel">
-            <p class="system-status">SELECCIONE NIVEL DE INFILTRACIÓN</p>
-            <div class="menu-options">
-                <button class="btn-shadow" onclick="startGame('easy')">
-                    MODO CADETE <span class="lvl-tag lvl-easy">EASY</span>
-                </button>
-                <button class="btn-shadow" onclick="startGame('medium')">
-                    MODO AGENTE <span class="lvl-tag lvl-medium">MEDIUM</span>
-                </button>
-                <button class="btn-shadow" onclick="startGame('hard')">
-                    MODO NETRUNNER <span class="lvl-tag lvl-hard">HARD</span>
-                </button>
-            </div>
-        </div>
-    </div>
+  </footer>
 
-    <div id="game-screen" class="terminal-main hidden">
-        <header>
-            <h2 id="game-title">SESSION ACTIVE</h2>
-            <p id="game-status" class="system-status">ESTADO: ESPERANDO HACKEO...</p>
-        </header>
-
-        <div id="board"></div>  
-
-        <div class="input-area">
-            <input type="text" id="user-guess" maxlength="5" placeholder="CÓDIGO..." autocomplete="off">
-            <button id="execute-btn" class="btn-shadow">EJECUTAR PROTOCOLO</button>
-        </div>
-
-        <footer class="terminal-stats">
-            <p>TIME: <span id="timer">60</span>s</p>
-            <button id="back-btn" class="btn-abort">ABORTAR MISION</button>
-        </footer>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="terminal-script.js"></script>
 </body>
 </html>

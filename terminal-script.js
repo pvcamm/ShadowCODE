@@ -169,10 +169,16 @@ function gameOver(exito) {
             <div class="victory-panel">
                 <h1>🔓 ACCESO CONCEDIDO</h1>
                 <div class="victory-subtitle">SISTEMA INFILTRADO CON ÉXITO</div>
-                <div class="victory-stats">
-                    <div class="stat-item"><span class="stat-label">ESTADO</span><span class="stat-value compromise">COMPROMETIDO</span></div>
-                    <div class="stat-item"><span class="stat-label">RACHA ACTUAL</span><span class="stat-value">${rachaActual}x 🔥</span></div>
-                    <div class="stat-item"><span class="stat-label">RÉCORD UNERG</span><span class="stat-value">${rachaMax}x</span></div>
+                  <div class="result-box">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>ESTADO:</span><span style="color: #00ffaa;">COMPROMETIDO</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>RACHA ACTUAL:</span><span style="color: #ffcc00;">${rachaActual}x 🔥</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>RÉCORD UNERG:</span><span style="color: white;">${rachaMax}x</span>
+                    </div>
                 </div>
                 <div class="victory-buttons">
                     <button class="btn-victory primary" onclick="reiniciarJuego()">NUEVA INFILTRACIÓN</button>
@@ -267,14 +273,19 @@ function matrixRain(isVictory = true) {
     const columns = canvas.width / fontSize;
     const drops = Array(Math.floor(columns)).fill(1);
     
-    function draw() {
+   function draw() {
         ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#00ff88";
-        ctx.font = `bold ${fontSize}px "Fira Mono", monospace`;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#00ff88";
+        
         for (let i = 0; i < drops.length; i++) {
+            // Alternar color entre verde claro y verde más brillante
+            const greenShade = Math.random() > 0.7 ? "#88ff88" : "#00ff88";
+            ctx.fillStyle = greenShade;
+            const fontSizeVar = fontSize + (Math.random() > 0.9 ? 4 : 0);
+            ctx.font = `bold ${fontSizeVar}px "Fira Mono", monospace`;
+            ctx.shadowBlur = Math.random() > 0.8 ? 12 : 6;
+            ctx.shadowColor = "#00ff88";
+            
             const text = chars[Math.floor(Math.random() * chars.length)];
             ctx.fillText(text, i * fontSize, drops[i] * fontSize);
             if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;

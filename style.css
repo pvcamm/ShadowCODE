@@ -605,6 +605,7 @@ footer {
   align-items: center !important;
   justify-content: center !important;
   font-family: 'Space Grotesk', 'Poppins', monospace;
+  transform: all 0.3s ease !important;
 }
 #overlay.hidden {
   display: none !important;
@@ -614,27 +615,28 @@ footer {
 .victory-panel {
   background: rgba(15, 10, 31, 0.95);
   border: 2px solid #00ffaa;
-  border-radius: 48px;
-  padding: 2rem 2rem;  /* más espacio lateral */
-  max-width: 550px;     /* más ancho */
+  border-radius: 40px;
+  padding: 2rem;  
+  max-width: 450px;     
   width: 90%;
   text-align: center;
   box-shadow: 0 0 80px rgba(0,255,170,0.4);
-  animation: fadeScale 0.4s ease;
+  animation: fadeScale 0.3s ease;
   backdrop-filter: blur(8px);
 }
 .victory-panel h1 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  background: linear-gradient(135deg, #00ffaa, #00cc88);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-
-  text-shadow: 0 0 20px rgba(0,255,170,0.5);
-  margin-bottom: 0.5rem;
+  color: #00ffaa;
+  text-shadow: 0 0 15px #00ffaa;
+  font-size: 2rem;
 }
+.result-box {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 24px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
 .victory-subtitle {
   color: #88ffcc;
   font-size: 0.9rem;

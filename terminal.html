@@ -3,91 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShadowCODE | Terminal de Infiltración</title>
+  <title>PassWordle | Terminal de Infiltración</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
   <style>
     /* === CYBERPUNK MODE SELECTION - FULL SYNC CON LANDING === */
     .mode-screen {
       position: fixed; inset: 0;
-      background: radial-gradient(circle at 50% 30%, #1a0b2e 0%, #0a001f 70%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: transparent;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
       z-index: 10; color: #fff; font-family: 'Space Grotesk', sans-serif;
+      padding-top: 130px;
     }
 
     /* TÍTULO DINÁMICO CON GLITCH (igual que landing) */
     .mode-screen h1.glitch {
       font-size: 2.6rem; letter-spacing: 6px; text-transform: uppercase;
-      text-shadow: 0 0 20px #c026d3;
+      text-shadow: 0 0 10px rgba(135, 30, 215, 0.5);
       animation: glitch-text 1.2s infinite linear alternate;
     }
 
     @keyframes glitch-text {
-      0% { text-shadow: 2px 0 #c026d3, -2px 0 hsla(0, 100%, 50%, 0.856); }
-      15% { text-shadow: -2px 0 #c026d3, 2px 0 #0a0475; }
-      30% { text-shadow: 2px 0 #c026d3, -2px 0 #ff0101; }
-      45% { text-shadow: -2px 0 #c026d3, 2px 0 #8d0303; }
-      60% { text-shadow: 3px 0 #c026d3, -3px 0 #1500ff; }
-      100% { text-shadow: 2px 0 #c026d3, -2px 0 #6a00ff; }
+      0% { text-shadow: 2px 0 rgba(135, 30, 215, 0.5), -2px 0 rgba(70, 10, 120, 0.5); }
+      100% { text-shadow: -2px 0 rgba(135, 30, 215, 0.5), 2px 0 rgba(70, 10, 120, 0.5); }
     }
 
     .mode-screen .subtitle {
-      font-size: 1.1rem; opacity: 0.75; letter-spacing: 3px; margin-bottom: 40px;
+      font-size: 1.1rem; opacity: 0.75; letter-spacing: 3px; margin-bottom: 40px; color: #aaa;
     }
 
     .mode-grid {
       display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; justify-content: center; max-width: 1020px;
     }
+    
+    .menu-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
     .mode-btn {
-      background: rgba(194,38,211,0.08); border: 2px solid #c026d3; color: #fff;
-      padding: 32px 48px; border-radius: 16px; font-size: 1.4rem; text-align: center;
-      min-width: 280px; transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
-      box-shadow: 0 0 25px rgba(194,38,211,0.4); text-transform: uppercase; letter-spacing: 2px;
+      background: rgba(10, 5, 15, 0.6);
+      padding: 32px 48px; border-radius: 6px; font-size: 1.4rem; text-align: center;
+      width: 100%; max-width: 320px; transition: all 0.3s ease;
+      box-shadow: none; text-transform: uppercase; letter-spacing: 2px;
       position: relative;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      box-sizing: border-box;
     }
-
-    /* EFECTO NEON PULSE EN BOTONES */
-    .mode-btn::before {
-      content: ''; position: absolute; inset: 0; border-radius: 16px;
-      box-shadow: 0 0 25px currentColor; opacity: 0; transition: opacity 0.3s;
-    }
-    .mode-btn:hover::before { opacity: 1; }
-
-    .mode-btn:hover {
-      transform: translateY(-10px) scale(1.06);
-      box-shadow: 0 0 45px currentColor;
-    }
-
-    /* COLORES POR DIFICULTAD */
-    .mode-btn.junior .label { color: #00ff2a; text-shadow: 0 0 12px #00ff2a; }
-    .mode-btn.agent .label { color: #ffe600; text-shadow: 0 0 12px #ffe600; }
-    .mode-btn.netrunner .label { color: #ff0000; text-shadow: 0 0 12px #ff0000; }
-
-    .mode-btn.junior:hover { border-color: #00ff2a; color: #00ff2a; }
-    .mode-btn.agent:hover { border-color: #ffe600; color: #ffe600; }
-    .mode-btn.netrunner:hover { border-color: #ff0000; color: #ff0000; }
-
+    
     .mode-btn .label {
-      display: block; font-size: 1rem; margin-top: 8px; opacity: 0.9; letter-spacing: 3px;
+      display: block; font-size: 1rem; margin-top: 8px; opacity: 0.9; letter-spacing: 3px; font-family: 'Fira Mono', monospace; text-align: center;
     }
+
+    /* COLORES POR DIFICULTAD IDÉNTICO AL SCREENSHOT */
+    .mode-btn.junior { border: 1px solid #00ff88; color: #00ff88; text-shadow: 0 0 12px rgba(0,255,136,0.6); }
+    .mode-btn.junior .label { color: #00ff88; }
+    .mode-btn.junior:hover { background: rgba(0,255,136,0.1); transform: translateY(-5px); box-shadow: 0 5px 25px rgba(0,255,136,0.2); }
+
+    .mode-btn.agent { border: 1px solid #ffcc00; color: #ffcc00; text-shadow: 0 0 12px rgba(255,204,0,0.6); }
+    .mode-btn.agent .label { color: #ffcc00; }
+    .mode-btn.agent:hover { background: rgba(255,204,0,0.1); transform: translateY(-5px); box-shadow: 0 5px 25px rgba(255,204,0,0.2); }
+
+    .mode-btn.netrunner { border: 1px solid #ff3366; color: #ff3366; text-shadow: 0 0 12px rgba(255,51,102,0.6); }
+    .mode-btn.netrunner .label { color: #ff3366; }
+    .mode-btn.netrunner:hover { background: rgba(255,51,102,0.1); transform: translateY(-5px); box-shadow: 0 5px 25px rgba(255,51,102,0.2); }
 
     /* BOTÓN ABORTAR - HOVER OSCURO/ROJO INTENSO */
     .abort-bar button {
-      margin-top: 70px; background: transparent; border: 2px solid #900404;
-      color: #900404; padding: 16px 42px; font-size: 1.1rem; border-radius: 9999px;
+      margin-top: 70px; background: transparent; border: 1px solid rgba(135, 30, 215, 0.4);
+      color: #aaa; padding: 16px 42px; font-size: 1.1rem; border-radius: 4px;
       transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 2px;
+      cursor: pointer; font-family: 'Space Grotesk', sans-serif;
     }
     .abort-bar button:hover {
-      background: #ff4d4d; color: #0a001f; box-shadow: 0 0 30px #ff4d4d;
-      transform: scale(1.08);
+      background: rgba(255, 51, 102, 0.1); color: #fff; box-shadow: none; border-color: #ff3366;
+      transform: translateY(-2px);
     }
 
     /* GAME SCREEN */
     #game-screen {
-      position: fixed; inset: 0; background: radial-gradient(circle at 50% 30%, #1a0b2e 0%, #0a001f 70%);
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-      color: #fff; font-family: 'Space Grotesk', sans-serif; padding: 20px;
+      position: fixed; inset: 0; background: transparent;
+      display: none; flex-direction: column; align-items: center; justify-content: flex-start;
+      color: #fff; font-family: 'Space Grotesk', sans-serif;
+      padding: 80px 5% 20px; /* same horizontal padding as nav, top clears the navbar */
+    }
+    #game-screen .game-container {
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
     }
     #game-screen.active { display: flex; }
   </style>
@@ -97,11 +112,20 @@
 <body>
   <div class="overlay-glow"></div>
   <div class="scanline"></div>
+  <div id="wordle-matrix"></div>
 
-  <!-- Audio controls (mantengo tu script original) -->
-  <div class="audio-controls" style="position:fixed; top:20px; right:20px; z-index:9999;">
-    <button id="mute-btn" class="btn-mute" style="background:rgba(0,0,0,0.7); border:1px solid #1a0b2e; color: #fff; padding:10px 14px; border-radius:50%; font-size:0.8rem;">🔊</button>
-  </div>
+  <!-- Header Navbar Sync -->
+  <header>
+    <nav>
+      <div class="logo" style="margin-right: auto;"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">Pass</span><span style="color:#d88eff">Wordle</span></div>
+      <ul class="nav-links">
+        <li><a href="index.html#inicio">Ayuda</a></li>
+        <li><a href="index.html" class="play-link" style="padding: 8px 16px;">Ir al Dashboard</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Audio controls (Removed for cleaner UI) -->
   <audio id="bg-music" loop></audio>
   <audio id="alarm-sound" loop></audio>
 
@@ -115,15 +139,17 @@
     <div class="menu-buttons">
       <button class="mode-btn junior" data-diff="easy" onclick="startGame('easy')">
         MODO JUNIOR<br>
-        <span class="label">EASY • 90s</span>
+        <span class="label">EASY</span>
       </button>
+      
       <button class="mode-btn agent" data-diff="medium" onclick="startGame('medium')">
         MODO AGENTE<br>
-        <span class="label">MEDIUM • 60s</span>
+        <span class="label">MEDIUM</span>
       </button>
+      
       <button class="mode-btn netrunner" data-diff="hard" onclick="startGame('hard')">
         MODO NETRUNNER<br>
-        <span class="label">HARD • 30s</span>
+        <span class="label">HARD</span>
       </button>
     </div>
     
@@ -132,41 +158,206 @@
     </div>
   </div>
 
+  <!-- === PANTALLA DE CARGA === -->
+  <div id="loading-screen" class="mode-screen" style="display: none; background: transparent; justify-content: center; padding-top: 0;">
+    <div class="h1-tile-container" id="loading-tiles" style="flex-direction: row; width: 100%; justify-content: center; flex-wrap: nowrap;">
+      <div class="title-tile" id="load-0"></div>
+      <div class="title-tile" id="load-1"></div>
+      <div class="title-tile" id="load-2"></div>
+      <div class="title-tile" id="load-3"></div>
+      <div class="title-tile" id="load-4"></div>
+      <div class="title-tile" id="load-5"></div>
+      <div class="title-tile" id="load-6"></div>
+      <div class="title-tile" id="load-7"></div>
+    </div>
+    <div style="margin-top: 30px; font-family: 'Fira Mono', monospace; color: #888; font-size: 0.9rem; letter-spacing: 2px;" class="blink-loading">
+      [ VERIFICANDO SISTEMA... ]
+    </div>
+  </div>
+
+  <style>
+    /* ==== GAME SCREEN ==== */
+    #game-screen {
+      position: fixed;
+      inset: 0;
+      padding: 75px 4% 12px;
+      background: transparent;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #game-screen .game-container {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(8px, 1.2vh, 14px);
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    #game-screen.active { display: flex; }
+
+    /* Terminal window: wraps content, does NOT stretch */
+    #game-screen .feature-card.window-style {
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+      flex: none;
+    }
+    #game-screen .feature-card.window-style:hover {
+      transform: none;
+    }
+    #game-screen .w-body {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(10px, 2vh, 20px) 12px !important;
+    }
+
+    /* Board tiles scale using vmin (smallest screen dimension) */
+    .game-board {
+      display: grid;
+      gap: clamp(4px, 0.8vmin, 8px);
+      margin: 0 auto;
+    }
+    .game-board .tile {
+      width: clamp(30px, 7vmin, 58px);
+      height: clamp(30px, 7vmin, 58px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(1rem, 3.8vmin, 1.8rem);
+      font-family: 'Space Grotesk', sans-serif;
+      text-transform: uppercase; font-weight: bold; background: transparent;
+      transition: all 0.3s ease;
+      color: #fff;
+    }
+
+    /* Keyboard — never collapses, scales with viewport */
+    .keyboard {
+      display: flex; flex-direction: column;
+      gap: clamp(3px, 0.6vh, 7px);
+      width: 100%;
+      flex-shrink: 0;
+    }
+    .key-row {
+      display: flex; justify-content: center;
+      gap: clamp(3px, 0.4vw, 6px);
+    }
+    .key {
+      background: rgba(30, 10, 35, 0.6);
+      border: 1px solid rgba(135, 30, 215, 0.4);
+      color: #ffffff; border-radius: 6px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.65rem, 2.2vw, 0.95rem);
+      font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      height: clamp(30px, 4.5vh, 46px);
+      flex: 1; min-width: 0; transition: all 0.2s ease;
+      outline: none; -webkit-tap-highlight-color: transparent; text-transform: uppercase;
+      user-select: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .key:hover {
+      background: rgba(135, 30, 215, 0.15);
+      border-color: rgba(135, 30, 215, 0.8);
+      color: #fff;
+    }
+    .key.wide { flex: 1.5; font-size: clamp(0.55rem, 1.8vw, 0.85rem); }
+    .key:active { transform: translateY(2px) scale(0.96); background: rgba(135, 30, 215, 0.4); }
+    .key.correct { background: transparent !important; color: #00ff88 !important; border: 2px solid #00ff88 !important; text-shadow: 0 0 10px rgba(0,255,136,0.6) !important; }
+    .key.partial { background: transparent !important; color: #ffcc00 !important; border: 2px solid #ffcc00 !important; text-shadow: 0 0 10px rgba(255,204,0,0.6) !important; }
+    .key.incorrect { background: #1a1a1a; color: #555; border-color: #333; }
+
+    .tile.correct { background: transparent !important; color: #00ff88 !important; border: 2px solid #00ff88 !important; text-shadow: 0 0 10px rgba(0,255,136,0.6) !important; box-shadow: none; }
+    .tile.partial { background: transparent !important; color: #ffcc00 !important; border: 2px solid #ffcc00 !important; text-shadow: 0 0 10px rgba(255,204,0,0.6) !important; box-shadow: none; }
+    .tile.incorrect { background: rgba(20,20,25,0.8) !important; color: #555 !important; border: 2px solid #333 !important; text-shadow: none !important; }
+
+    @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .blink-loading { animation: blink-fast 1s infinite; }
+    #loading-tiles { gap: 8px; }
+    #loading-tiles .title-tile {
+      animation: none;
+      width: clamp(38px, 8vw, 65px);
+      height: clamp(38px, 8vw, 65px);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+    }
+  </style>
+
   <!-- === PANTALLA DE JUEGO === -->
   <div id="game-screen">
-    <div class="game-bg-grid"></div>
-    <div class="particles" id="particles"></div>
     <div class="game-container">
 
-      <!-- Cabecera: TIME | MODO | SESSION -->
-      <div class="game-header">
-        <div class="time-box">
-          <div class="time-label">TIME</div>
-          <div class="time-value"><span id="timer">90</span> <span class="secs">SECS</span></div>
+      <!-- Terminal Window: only the board -->
+      <div class="feature-card window-style" style="width: 100%;">
+        <div class="w-header">
+          <span class="w-title" style="font-size: 0.9rem; font-family: 'Fira Mono', monospace;">
+            <span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">op</span><span style="color:#fff">:~/board</span>
+          </span>
+          <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
         </div>
-        <div class="mode-box">
-          <h2 id="game-mode-title" class="game-title">MODO</h2>
-        </div>
-        <div class="session-box">
-          <div class="session-active">SESSION ACTIVE</div>
-          <div id="game-status" class="session-state">Estado: Operando Hackeo</div>
+        <div class="w-body" style="padding: 16px 20px; display: flex; flex-direction: column; align-items: center;">
+          <div id="board" class="game-board"></div>
         </div>
       </div>
 
-      <!-- Tablero de letras (Wordle) -->
-      <div id="board" class="game-board"></div>
-
-      <!-- Área de comandos -->
-      <div class="command-area">
-        <div id="invalid-toast" style="display:none; color:#ff4d4d; font-size:0.9rem; margin-top:8px; text-align:center; animation: shake 0.4s;"></div>
-        <input type="text" id="user-guess" placeholder="INGRESE COMANDO" class="command-input" autocomplete="off">
-        <div class="action-buttons">
-          <button id="execute-btn" class="btn-execute">EJECUTAR</button>
-          <button id="back-btn" class="btn-abort">ABORTAR</button>
+      <!-- Keyboard OUTSIDE the window -->
+      <div id="keyboard" class="keyboard" style="width: 100%;">
+        <div id="invalid-toast" style="display:none; color:#ff3366; font-size:0.9rem; text-align:center; animation: shake 0.4s; margin-bottom: 8px;"></div>
+        <div class="key-row">
+            <button class="key" data-key="Q">Q</button><button class="key" data-key="W">W</button>
+            <button class="key" data-key="E">E</button><button class="key" data-key="R">R</button>
+            <button class="key" data-key="T">T</button><button class="key" data-key="Y">Y</button>
+            <button class="key" data-key="U">U</button><button class="key" data-key="I">I</button>
+            <button class="key" data-key="O">O</button><button class="key" data-key="P">P</button>
         </div>
+        <div class="key-row">
+            <button class="key" data-key="A">A</button><button class="key" data-key="S">S</button>
+            <button class="key" data-key="D">D</button><button class="key" data-key="F">F</button>
+            <button class="key" data-key="G">G</button><button class="key" data-key="H">H</button>
+            <button class="key" data-key="J">J</button><button class="key" data-key="K">K</button>
+            <button class="key" data-key="L">L</button><button class="key" data-key="Ñ">Ñ</button>
+        </div>
+        <div class="key-row">
+            <button class="key wide" data-key="ENTER">ENTER</button>
+            <button class="key" data-key="Z">Z</button><button class="key" data-key="X">X</button>
+            <button class="key" data-key="C">C</button><button class="key" data-key="V">V</button>
+            <button class="key" data-key="B">B</button><button class="key" data-key="N">N</button>
+            <button class="key" data-key="M">M</button>
+            <button class="key wide" data-key="BACKSPACE">⌫</button>
+        </div>
+      </div>
+
+      <!-- Abort button -->
+      <div style="display: flex; justify-content: center; width: 100%;">
+          <button id="back-btn" style="padding: 8px 32px; font-size: 0.9rem; color: #ff3366; border: 1px solid rgba(255,51,102,0.4); background: rgba(255,51,102,0.05); cursor: pointer; transition: 0.3s; font-family: 'Space Grotesk', sans-serif; letter-spacing: 2px; border-radius: 4px;">ABORTAR</button>
       </div>
 
     </div>
+  </div>
+
+  <!-- Custom Confirm Modal -->
+  <div id="confirm-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center;">
+      <div class="feature-card window-style" style="width: 100%; max-width: 350px;">
+          <div class="w-header">
+              <span class="w-title">sys@op:~/system</span>
+              <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
+          </div>
+          <div class="w-body" style="padding: 30px 20px; text-align: center;">
+              <h3 style="color: #ff3366; margin-bottom: 15px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase;">¿ALERTA CRÍTICA?</h3>
+              <p style="color: #aaa; margin-bottom: 25px; font-size: 0.95rem; font-family: 'Fira Mono', monospace;">Al abortar esta operación, su racha actual de hackeo será eliminada.</p>
+              <div style="display: flex; justify-content: center; gap: 15px;">
+                  <button id="cancel-abort-btn" class="key" style="min-width: 100px; padding: 8px;">CANCELAR</button>
+                  <button id="confirm-abort-btn" class="key incorrect" style="min-width: 100px; padding: 8px; color: #ff3366; border-color: rgba(255,51,102, 0.6); background: rgba(255,51,102, 0.1);">ABORTAR</button>
+              </div>
+          </div>
+      </div>
   </div>
 
   <div id="overlay" class="hidden"></div>

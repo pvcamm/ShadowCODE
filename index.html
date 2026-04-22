@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShadowCODE | Official Site</title>
+  <title>PassWordle | Official Site</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="overlay-glow"></div>
   <div class="scanline"></div>
+  <div id="wordle-matrix"></div>
 
-  <div class="audio-controls">
-    <button id="mute-btn" class="btn-mute">🔊</button>
-  </div>
+
   <audio id="bg-music" loop></audio>
   <audio id="alarm-sound" loop></audio>
 
@@ -21,23 +20,62 @@
 
   <header>
     <nav>
-      <div class="logo">Shadow<span>CODE</span></div>
-      <ul class="nav-links">
-        <li><a href="#inicio">Home</a></li>
+      <div class="logo"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">Pass</span><span style="color:#d88eff">Wordle</span></div>
+      <ul class="nav-links" style="align-items: center;">
+        <li><a href="#inicio">Ayuda</a></li>
         <li><a href="#features">Características</a></li>
-        <li><a href="terminal.html" class="play-link">JUGAR</a></li>
+        <li>
+            <button id="mute-btn" class="btn-audio">
+                <span class="audio-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
+                <span class="audio-text">MUTE</span>
+            </button>
+        </li>
       </ul>
     </nav>
   </header>
 
   <section id="inicio" class="hero">
-    <div class="hero-content">
-      <span class="badge">PROYECTO UNERG 2026</span>
-      <h1>SHADOW<br><span class="glitch">CODE</span></h1>
-      <p class="tagline">Sobrevive a la ejecución.<br>Depura tu destino.</p>
-      <div class="hero-btns">
-        <a href="terminal.html" class="btn-primary">INICIAR OPERACIÓN</a>
-        <a href="#features" class="btn-secondary">SABER MÁS</a>
+    <div class="hero-grid">
+      <!-- Lado Izquierdo (Texto y Botón) -->
+      <div class="hero-left">
+        <h1 class="h1-tile-container">
+          <div class="title-word">
+            <span class="title-tile correct">P</span>
+            <span class="title-tile partial">A</span>
+            <span class="title-tile">S</span>
+            <span class="title-tile">S</span>
+          </div>
+          <div class="title-word">
+            <span class="title-tile">W</span>
+            <span class="title-tile correct">O</span>
+            <span class="title-tile">R</span>
+            <span class="title-tile partial">D</span>
+            <span class="title-tile">L</span>
+            <span class="title-tile">E</span>
+          </div>
+        </h1>
+        <p class="tagline">Sobrevive a la ejecución.<br>Depura tu destino.</p>
+        <div class="hero-btns">
+          <a href="terminal.html" class="btn-primary">INICIAR OPERACIÓN</a>
+        </div>
+      </div>
+
+      <!-- Lado Derecho (Terminal Interactivo) -->
+      <div class="hero-right">
+        <div class="hacker-terminal">
+          <div class="term-header">
+            <div class="term-title"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">passwordle</span><span style="color:#444">:~</span></div>
+            <div class="linux-controls">
+              <span class="linux-btn">_</span>
+              <span class="linux-btn">□</span>
+              <span class="linux-btn">✖</span>
+            </div>
+          </div>
+          <div class="term-body">
+            <pre id="typing-text" class="terminal-font type-effect"></pre>
+            <span class="cursor-blink">_</span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="hero-orb orb-1"></div>
@@ -46,20 +84,44 @@
 
   <section id="features" class="features-section">
     <div class="features-container">
-      <div class="feature-card">
-        <div class="icon">💻</div>
-        <h3>Core Engine</h3>
-        <p>Optimizado para alto rendimiento en web y dispositivos móviles.</p>
+      <div class="feature-card window-style">
+        <div class="w-header">
+          <span class="w-title">sys@engine:~/core</span>
+          <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
+        </div>
+        <div class="w-body">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          </div>
+          <h3>Core Engine</h3>
+          <p>Optimizado para alto rendimiento en terminal y procesos sin latencia.</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon">🛡️</div>
-        <h3>Seguridad</h3>
-        <p>Implementación de lógica de colisiones avanzada y gestión de estados.</p>
+      <div class="feature-card window-style">
+        <div class="w-header">
+          <span class="w-title">sys@sec:~/hash</span>
+          <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
+        </div>
+        <div class="w-body">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <h3>Protocolo de Seguridad</h3>
+          <p>Algoritmos rígidos de colisión de hashes y gestión de estados.</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon">🎨</div>
-        <h3>Estética Morada</h3>
-        <p>Interfaz diseñada bajo estándares de UX moderna con tonos Deep Purple.</p>
+      <div class="feature-card window-style">
+        <div class="w-header">
+          <span class="w-title">sys@ui:~/stealth</span>
+          <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
+        </div>
+        <div class="w-body">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          </div>
+          <h3>Estética Stealth</h3>
+          <p>Interfaz diseñada bajo patrones minimalistas oscuros sin distracciones visuales.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -68,10 +130,10 @@
     <div class="footer-content">
       <p class="author">Diseñado y Programado por <strong>Paola Camaripano</strong></p>
       <p class="university">Universidad Nacional Experimental Rómulo Gallegos</p>
-      <p class="copyright">© 2026 ShadowCODE - Todos los derechos reservados.</p>
+      <p class="copyright">© 2026 PassWordle - Todos los derechos reservados.</p>
     </div>
   </footer>
 
-  <script src="terminal-script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -2,25 +2,25 @@
 
 const MOODS = {
     easy: { 
-        tiempo: 90, 
-        palabras: ["DRIVE", "BOARD", "CABLE", "MOUSE", "PANEL", "CHIPS", "TOUCH", "POWER", "RESET", "INPUT", "PRINT", "CLICK", "FILES", "SETUP", "SOUND"] 
+        intentos: 6, 
+        palabras: ["DRIVE", "BOARD", "CABLE", "MOUSE", "PANEL", "CHIPS", "TOUCH", "POWER", "RESET", "INPUT", "PRINT", "CLICK", "FILES", "SETUP", "SOUND", "CYBER", "MEDIA", "LOCAL", "ERROR"] 
     },
     medium: { 
-        tiempo: 60, 
-        palabras: ["ARRAY", "LOGIC", "BUILD", "DEBUG", "TRACE", "STACK", "QUEUE", "SCOPE", "ASYNC", "FETCH", "CONST", "QUERY", "INDEX", "PATCH", "SHELL"] 
+        intentos: 6, 
+        palabras: ["ARRAY", "LOGIC", "BUILD", "DEBUG", "TRACE", "STACK", "QUEUE", "SCOPE", "ASYNC", "FETCH", "CONST", "QUERY", "INDEX", "PATCH", "SHELL", "VIRUS", "CHASH", "RETRY"] 
     },
     hard: { 
-        tiempo: 30, 
-        palabras: ["PROXY", "CLOUD", "NODES", "PORTS", "ADMIN", "TOOLS", "TOKEN", "CACHE", "LOGIN", "HTTPS", "LINUX", "MODEM", "WIFIS", "VAULT", "ROOTS"] 
+        intentos: 6, 
+        palabras: ["PROXY", "CLOUD", "NODES", "PORTS", "ADMIN", "TOOLS", "TOKEN", "CACHE", "LOGIN", "HTTPS", "LINUX", "MODEM", "WIFIS", "VAULT", "ROOTS", "FRAME", "ASTRO", "CHMOD", "CLONE"] 
     }
 };
 
 let palabraSecreta = "";
-let tiempoRestante = 0;
-let timerId = null;
+let intentosRestantes = 0;
 let rachaActual = 0;
 let modoActual = "";
-let rachaMax = localStorage.getItem("shadowCodeStreak") || 0;
+let rachaMax = localStorage.getItem("passwordleStreak") || 0;
+            localStorage.setItem("passwordleStreak", rachaMax);
 
 let isMuted = false;
 const bgMusic = document.getElementById("bg-music");
@@ -33,7 +33,7 @@ const SOUNDS = {
 };
 
 function showScreen(screenId) {
-    const screens = ['mode-selection', 'game-screen'];
+    const screens = ['mode-selection', 'game-screen', 'loading-screen'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -42,26 +42,77 @@ function showScreen(screenId) {
     if (target) target.style.display = 'flex';
 }
 
+function playLoadingAnimation() {
+    showScreen('loading-screen');
+    const word = "CARGANDO";
+    const tiles = [];
+    for(let i=0; i<8; i++) {
+        const t = document.getElementById(`load-${i}`);
+        if(t) {
+            t.textContent = "";
+            t.className = "title-tile"; 
+            t.style.transform = "scale(1)";
+            t.style.transition = "transform 0.1s";
+            tiles.push(t);
+        }
+    }
+    
+    let i = 0;
+    const typeInterval = setInterval(() => {
+        if(i < word.length) {
+            tiles[i].textContent = word[i];
+            tiles[i].style.transform = "scale(1.15)";
+            const idx = i;
+            setTimeout(() => { tiles[idx].style.transform = "scale(1)"; }, 250);
+            i++;
+        } else {
+            clearInterval(typeInterval);
+            setTimeout(() => {
+                const colors = ["correct", "partial", "incorrect", "incorrect", "correct", "partial", "incorrect", "correct"];
+                tiles.forEach((t, idx) => {
+                    setTimeout(() => {
+                        t.classList.add(colors[idx % colors.length]);
+                        t.style.transform = "rotateX(360deg)";
+                        t.style.transition = "transform 0.6s ease";
+                    }, idx * 100); 
+                });
+                
+                setTimeout(() => {
+                    showScreen('game-screen');
+                    playMusic('game');
+                    startFlashingCursor(currentRow, 0);
+                }, 1500);
+            }, 800);
+        }
+    }, 350);
+}
+
 function startGame(diff) {
     modoActual = diff;
     const config = MOODS[diff];
     palabraSecreta = config.palabras[Math.floor(Math.random() * config.palabras.length)];
-    tiempoRestante = config.tiempo;
+    intentosRestantes = config.intentos;
 
-    showScreen("game-screen");
+    // Remove direct showScreen("game-screen") to let loading sequence act instead
     
-    const board = document.getElementById("board");
-    if (board) board.innerHTML = "";
-    const inputGuess = document.getElementById("user-guess");
-    if (inputGuess) {
-        inputGuess.disabled = false;
-        inputGuess.value = "";
-        inputGuess.style.color = "";
-        inputGuess.style.borderColor = "";
-    }
+    maxCols = palabraSecreta.length;
+    maxRows = intentosRestantes;
+    currentRow = 0;
+    currentGuess = "";
+    gameIsOver = false;
+    
+    // reset virtual keyboard
+    document.querySelectorAll(".key").forEach(k => {
+       k.className = k.className.replace(/(correct|partial|incorrect)/g, "").trim();
+    });
+    
+    renderEmptyBoard();
     document.body.classList.remove("win-active", "alarm-active");
-    const timerSpan = document.getElementById("timer");
-    if (timerSpan) timerSpan.textContent = tiempoRestante;
+    const attemptsSpan = document.getElementById("attempts-left");
+    if (attemptsSpan) attemptsSpan.textContent = intentosRestantes;
+
+    const targetMsg = document.getElementById("target-length-msg");
+    if (targetMsg) targetMsg.textContent = `[ INGRESE CÓDIGO DE ${palabraSecreta.length} CARACTERES ]`;
 
     const modeTitleElem = document.getElementById("game-mode-title");
     if (modeTitleElem) {
@@ -86,72 +137,231 @@ function startGame(diff) {
         oldCanvas.remove();
     }
 
-    startTimer();
     alarmSound.pause();
     alarmSound.currentTime = 0;
-    playMusic('game');
+    
+    // Initiates sequence
+    playLoadingAnimation();
 }
 
-function startTimer() {
-    clearInterval(timerId);
-    timerId = setInterval(() => {
-        if (tiempoRestante > 0) {
-            tiempoRestante--;
-            const timerSpan = document.getElementById("timer");
-            if (timerSpan) timerSpan.textContent = tiempoRestante;
+// NEW VIRTUAL KEYBOARD & GRID MECHANICS
+let currentGuess = "";
+let currentRow = 0;
+let maxCols = 5;
+let maxRows = 6;
+let flashingInterval = null;
+let gameIsOver = false;
+
+function renderEmptyBoard() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+    board.style.gridTemplateColumns = `repeat(${maxCols}, 1fr)`;
+    for(let r = 0; r < maxRows; r++) {
+        for(let c = 0; c < maxCols; c++) {
+            const tile = document.createElement("div");
+            tile.className = "tile empty";
+            tile.id = `tile-${r}-${c}`;
+            board.appendChild(tile);
+        }
+    }
+}
+
+function startFlashingCursor(r, c) {
+    clearInterval(flashingInterval);
+    const tile = document.getElementById(`tile-${r}-${c}`);
+    if(!tile) return;
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
+    tile.classList.add("flashing-cursor");
+    flashingInterval = setInterval(() => {
+        tile.textContent = chars[Math.floor(Math.random()*chars.length)];
+        tile.style.color = "#ffffff";
+    }, 50);
+}
+
+function stopFlashingCursor() {
+    clearInterval(flashingInterval);
+}
+
+function updateBoard() {
+    for(let c = 0; c < maxCols; c++) {
+        const tile = document.getElementById(`tile-${currentRow}-${c}`);
+        if(c < currentGuess.length) {
+            tile.textContent = currentGuess[c];
+            tile.style.color = "#fff"; 
+            tile.style.transform = "scale(1.1)";
+            setTimeout(()=> tile.style.transform="scale(1)", 100);
+            tile.classList.remove("flashing-cursor");
         } else {
-            gameOver(false);
+            if(c === currentGuess.length) {
+                startFlashingCursor(currentRow, c);
+            } else {
+                tile.textContent = "";
+                tile.classList.remove("flashing-cursor");
+            }
         }
-    }, 1000);
+    }
+    if(currentGuess.length === maxCols) stopFlashingCursor(); 
 }
 
-function procesarIntento() {
-    const entrada = document.getElementById("user-guess");
-    if (!entrada) return;
-    const suposicion = entrada.value.toUpperCase();
-    const tablero = document.getElementById("board");
-    if (suposicion.length !== 5) return;
-
-    const listaPalabrasModo = MOODS[modoActual].palabras;
-
-    if (!listaPalabrasModo.includes(suposicion)) {
-        entrada.style.color = "#ff4d4d";
-        entrada.style.borderColor = "#ff4d4d";
-        entrada.classList.add("error-shake");
-        setTimeout(() => entrada.classList.remove("error-shake"), 500);
-        return;
+function handleKeyPress(key) {
+    if(gameIsOver) return;
+    if(key === 'ENTER') {
+        if(currentGuess.length !== maxCols) {
+            const toast = document.getElementById("invalid-toast");
+            if(toast) {
+                toast.textContent = `SE REQUIEREN ${maxCols} CARACTERES`;
+                toast.style.display = "block";
+                setTimeout(() => toast.style.display = "none", 1500);
+            }
+        } else {
+            procesarIntentoWordle();
+        }
+    } else if(key === 'BACKSPACE' || key === 'DEL' || key === '⌫') {
+        if(currentGuess.length > 0) {
+            currentGuess = currentGuess.slice(0, -1);
+            stopFlashingCursor();
+            const tile = document.getElementById(`tile-${currentRow}-${currentGuess.length}`);
+            tile.textContent = "";
+            updateBoard();
+        }
     } else {
-        entrada.style.color = "#22d3ee";
-        entrada.style.borderColor = "#22d3ee";
+        if(currentGuess.length < maxCols && /^[A-ZÑ]$/.test(key)) {
+            currentGuess += key;
+            updateBoard();
+        }
+    }
+}
+
+function procesarIntentoWordle() {
+    stopFlashingCursor();
+    const guess = currentGuess;
+    const len = maxCols;
+    const tilesColors = Array(len).fill("incorrect");
+    const secretArr = palabraSecreta.split("");
+    const guessArr = guess.split("");
+
+    for (let i = 0; i < len; i++) {
+        if (guessArr[i] === secretArr[i]) {
+            tilesColors[i] = "correct";
+            secretArr[i] = null; 
+            guessArr[i] = null;
+        }
     }
 
-    const fragment = document.createDocumentFragment();
-    for (let i = 0; i < 5; i++) {
-        const cuadro = document.createElement("div");
-        cuadro.classList.add("tile");
-        cuadro.textContent = suposicion[i];
-        if (suposicion[i] === palabraSecreta[i]) {
-            cuadro.classList.add("correct");
-        } else if (palabraSecreta.includes(suposicion[i])) {
-            cuadro.classList.add("partial");
+    for (let i = 0; i < len; i++) {
+        if (guessArr[i] !== null && secretArr.includes(guessArr[i])) {
+            tilesColors[i] = "partial";
+            secretArr[secretArr.indexOf(guessArr[i])] = null;
         }
-        fragment.appendChild(cuadro);
     }
-    tablero.appendChild(fragment);
 
-    entrada.value = "";
-    if (suposicion === palabraSecreta) {
-        rachaActual++;
-        if (rachaActual > rachaMax) {
-            rachaMax = rachaActual;
-            localStorage.setItem("shadowCodeStreak", rachaMax);
+    let delay = 0;
+    for(let i=0; i<len; i++) {
+        const tile = document.getElementById(`tile-${currentRow}-${i}`);
+        const keyBtn = document.querySelector(`.key[data-key="${guess[i]}"]`);
+        setTimeout(() => {
+            tile.classList.add(tilesColors[i]);
+            tile.style.transform = "rotateX(360deg)";
+            
+            if(keyBtn) {
+                const isCurrentCorrect = keyBtn.classList.contains("correct");
+                const isCurrentPartial = keyBtn.classList.contains("partial");
+                if(tilesColors[i] === "correct") {
+                    keyBtn.className = "key correct";
+                } else if(tilesColors[i] === "partial" && !isCurrentCorrect) {
+                    keyBtn.className = "key partial";
+                } else if(tilesColors[i] === "incorrect" && !isCurrentCorrect && !isCurrentPartial) {
+                    keyBtn.className = "key incorrect";
+                }
+            }
+        }, delay);
+        delay += 250;
+    }
+
+    setTimeout(() => {
+        intentosRestantes--;
+        const attemptsSpan = document.getElementById("attempts-left");
+        if (attemptsSpan) attemptsSpan.textContent = intentosRestantes;
+        
+        if(guess === palabraSecreta) {
+            rachaActual++;
+            if (rachaActual > rachaMax) {
+                rachaMax = rachaActual;
+                localStorage.setItem("passwordleStreak", rachaMax);
+            }
+            gameOver(true);
+        } else if (intentosRestantes <= 0) {
+            gameOver(false);
+        } else {
+            currentRow++;
+            currentGuess = "";
+            startFlashingCursor(currentRow, 0);
         }
-        gameOver(true);
+    }, delay + 200);
+}
+
+function launchHackerConfetti() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
+    const numConfetti = 60; 
+    for (let i = 0; i < numConfetti; i++) {
+        const conf = document.createElement("div");
+        
+        // Randomize the tile style (green, yellow, or grey)
+        const typeRand = Math.random();
+        if(typeRand > 0.6) {
+            conf.className = "tile correct"; 
+        } else if (typeRand > 0.3) {
+            conf.className = "tile partial"; 
+        } else {
+            conf.className = "tile incorrect"; 
+        }
+        
+        conf.style.position = "fixed";
+        conf.style.zIndex = "8000";
+        conf.style.pointerEvents = "none";
+        conf.style.width = "25px";
+        conf.style.height = "25px";
+        conf.style.fontSize = "1.1rem";
+        conf.style.borderRadius = "2px"; // Enforce rigid square edges
+        
+        conf.textContent = chars[Math.floor(Math.random() * chars.length)];
+        
+        const isLeft = Math.random() > 0.5;
+        const startX = isLeft ? -80 : window.innerWidth + 80;
+        const startY = window.innerHeight + 60;
+        
+        // Apex of the throw
+        const midX = isLeft ? (window.innerWidth * 0.1 + Math.random() * window.innerWidth * 0.6) 
+                            : (window.innerWidth * 0.9 - Math.random() * window.innerWidth * 0.6);
+        const peakY = window.innerHeight * 0.1 + Math.random() * window.innerHeight * 0.4;
+        
+        const txMid = midX - startX;
+        const tyMid = peakY - startY;
+        
+        // Fall down, drift horizontally 
+        const drift = (Math.random() - 0.5) * 400;
+        const txEnd = txMid + drift; 
+        
+        conf.style.left = startX + "px";
+        conf.style.top = startY + "px";
+        
+        conf.style.setProperty('--tx-mid', `${txMid}px`);
+        conf.style.setProperty('--ty-mid', `${tyMid}px`);
+        conf.style.setProperty('--tx-end', `${txEnd}px`);
+        
+        // Slow down rotation so it doesn't look like a blurred circle
+        const rotAmount = (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360);
+        conf.style.setProperty('--rot', `${rotAmount}deg`);
+        
+        conf.style.animation = `hack-pop ${3.5 + Math.random()*2.5}s ease-in-out forwards`;
+        document.getElementById("overlay").appendChild(conf);
+        
+        setTimeout(() => conf.remove(), 6500);
     }
 }
 
 function gameOver(exito) {
-    clearInterval(timerId);
+    gameIsOver = true;
     bgMusic.pause();
     alarmSound.pause();
     alarmSound.currentTime = 0;
@@ -163,34 +373,81 @@ function gameOver(exito) {
 
     if (exito) {
         document.body.classList.add("win-active");
-        matrixRain(true);
 
         const victoryHTML = `
-            <div class="victory-panel">
-                <h1>🔓 ACCESO CONCEDIDO</h1>
-                <div class="victory-subtitle">SISTEMA INFILTRADO CON ÉXITO</div>
-                  <div class="result-box">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>ESTADO:</span><span style="color: #00ffaa;">COMPROMETIDO</span>
+            <div class="feature-card window-style" style="width: 100%; max-width: 450px; box-shadow: 0 0 30px rgba(0,255,136,0.1);">
+                <div class="w-header">
+                    <span class="w-title"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">op</span><span style="color:#fff">:~/victory_log</span></span>
+                    <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
+                </div>
+                <div class="w-body" style="padding: 25px; display: flex; flex-direction: column; gap: 15px; font-family: 'Fira Mono', monospace;">
+                    <div id="v-line1" style="color: #00ff88; font-weight: bold; font-size: 1.1rem; min-height: 1.5rem; text-shadow: 0 0 8px rgba(0,255,136,0.5);"></div>
+                    <div id="v-line2" style="color: #ffffff; font-size: 0.95rem; min-height: 1.2rem; text-shadow: 0 0 8px rgba(255,255,255,0.4);"></div>
+                    
+                    <!-- Stats Box (Hidden initially) -->
+                    <div id="v-stats" style="display: none; flex-direction: column; gap: 10px; margin-top: 15px; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 4px; border: 1px dashed rgba(0,255,136,0.3); font-size: 0.95rem; text-shadow: 0 0 5px rgba(255,255,255,0.2);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color:#aaa;">ESTADO:</span><span style="color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.6);">[ COMPROMETIDO ]</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color:#aaa;">RACHA ACTUAL:</span><span style="color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.6);">${rachaActual}x 🔥</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color:#aaa;">RÉCORD UNERG:</span><span style="color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.6);">${rachaMax}x</span>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>RACHA ACTUAL:</span><span style="color: #ffcc00;">${rachaActual}x 🔥</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>RÉCORD UNERG:</span><span style="color: white;">${rachaMax}x</span>
+
+                    <!-- Buttons (Hidden initially) -->
+                    <div id="v-buttons" style="display: none; margin-top: 25px; gap: 10px; justify-content: space-between;">
+                        <button class="key" onclick="reiniciarJuego()" style="font-size: 0.85rem; padding: 12px; border-color: rgba(0,255,136,0.5); color: #00ff88; background: rgba(0,255,136,0.1);">NUEVO ATAQUE</button>
+                        <button class="key" onclick="window.location.reload()" style="font-size: 0.85rem; padding: 12px; border-color: rgba(255,51,102,0.4); color: #ff3366; background: rgba(255,51,102,0.1);">DESCONECTAR</button>
                     </div>
                 </div>
-                <div class="victory-buttons">
-                    <button class="btn-victory primary" onclick="reiniciarJuego()">NUEVA INFILTRACIÓN</button>
-                    <button class="btn-victory secondary" onclick="window.location.reload()">VOLVER AL NÚCLEO</button>
-                </div>
-                <div class="victory-footer">PROTOCOLO DE VICTORIA EJECUTADO POR: CSIRT-UNERG</div>
             </div>
         `;
         overlay.innerHTML = victoryHTML;
+
+        // Custom typewriter effect for victory log
+        const vLines = [
+            { id: "v-line1", text: ">> ACCESO CONCEDIDO.", delay: 400 },
+            { id: "v-line2", text: ">> Ejecutando bypass al sistema proxy", dots: 3, delay: 1200 }
+        ];
+
+        function typeLine(lines, index) {
+            if(index >= lines.length) {
+                document.getElementById("v-stats").style.display = "flex";
+                setTimeout(() => document.getElementById("v-buttons").style.display = "flex", 500);
+                setTimeout(() => launchHackerConfetti(), 800);
+                return;
+            }
+            const data = lines[index];
+            const el = document.getElementById(data.id);
+            let charIndex = 0;
+            const tInterval = setInterval(() => {
+                el.textContent += data.text[charIndex];
+                charIndex++;
+                if(charIndex >= data.text.length) {
+                    clearInterval(tInterval);
+                    if (data.dots) {
+                        const baseText = el.textContent;
+                        let dotsCount = 0;
+                        setInterval(() => {
+                            dotsCount = (dotsCount + 1) % (data.dots + 1);
+                            el.textContent = baseText + ".".repeat(dotsCount);
+                        }, 400); // Bucle infinito visual
+                        
+                        setTimeout(() => typeLine(lines, index + 1), data.delay);
+                    } else {
+                        setTimeout(() => typeLine(lines, index + 1), data.delay);
+                    }
+                }
+            }, 35);
+        }
+
+        setTimeout(() => typeLine(vLines, 0), 300);
     } 
     else {
-        // === DERROTA MEJORADA ===
+        // === DERROTA - TERMINAL GLASSMORPHIC ===
         rachaActual = 0;
         document.body.classList.add("alarm-active");
         if (!isMuted) {
@@ -199,52 +456,97 @@ function gameOver(exito) {
             alarmSound.play().catch(e => console.log);
         }
 
+        const sessionId = Math.random().toString(16).toUpperCase().substring(2, 10);
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
         const central = document.createElement("div");
         central.className = "defeat-central";
         central.innerHTML = `
-            <div class="defeat-icon">⛔</div>
-            <h2>ACCESO DENEGADO</h2>
-            <p>Has sido detectado. La sesión ha sido terminada.</p>
-            <div class="defeat-stats">
-                <div>RACHA PERDIDA: <span>${rachaActual}x</span></div>
+            <div class="defeat-terminal-header">
+                <div class="header-title">SECURITY_BREACH.EXE</div>
+                <div class="defeat-controls"><span>_</span><span>□</span><span>✖</span></div>
             </div>
-            <button class="btn-defeat" onclick="location.reload()">REINFILTRARSE</button>
+            <div class="defeat-body">
+                <div class="defeat-code">[ ERROR 403 ]</div>
+                <h2 class="defeat-title">ACCESO DENEGADO</h2>
+                <p class="defeat-subtitle">INTRUSO DETECTADO — SESIÓN TERMINADA</p>
+                <div class="defeat-log">
+                    <div class="log-line"><span class="log-key">SESSION:</span><span class="log-val">#${sessionId}</span></div>
+                    <div class="log-line"><span class="log-key">TIMESTAMP:</span><span class="log-val">${timestamp}</span></div>
+                    <div class="log-line"><span class="log-key">ESTADO:</span><span class="log-val red">SISTEMA COMPROMETIDO</span></div>
+                    <div class="log-line"><span class="log-key">PALABRA:</span><span class="log-val yellow">${palabraSecreta}</span></div>
+                </div>
+                <div class="defeat-actions">
+                    <button class="btn-defeat-primary" onclick="location.reload()">REINTENTAR</button>
+                </div>
+            </div>
         `;
         overlay.appendChild(central);
+
+        const alertMessages = [
+            { title: "FIREWALL_BREACH.LOG", msg: "Actividad sospechosa detectada", detail: "IP rastreada. Protocolo de bloqueo iniciado." },
+            { title: "INTRUSION_ALERT.SYS", msg: "Acceso no autorizado", detail: "Agente neutralizado. Registros borrados." },
+            { title: "SECURE_BOOT.EXE", msg: "Protocolo de seguridad activo", detail: "Reiniciando defensa perimetral..." },
+            { title: "TRACE_ROUTE.SH", msg: "Identidad expuesta", detail: "Localización aproximada adquirida." },
+            { title: "KERNEL_PANIC.LOG", msg: "Proceso de hackeo fallido", detail: "Sistema volviendo al estado seguro." },
+            { title: "AUTH_DENIED.EXE", msg: "Credenciales inválidas", detail: "Sesión bloqueada por 24 horas." },
+        ];
         
-        const numVentanas = 4;
-        for (let i = 0; i < numVentanas; i++) {
+        let activeAlerts = 0;
+        const maxActive = 4;
+        
+        function spawnAlert() {
+            if (!document.body.classList.contains('alarm-active')) return;
+            if (activeAlerts >= maxActive) return;
+
+            const data = alertMessages[Math.floor(Math.random() * alertMessages.length)];
+            const alertId = Math.random().toString(16).toUpperCase().substring(2, 8);
+            
             const win = document.createElement("div");
             win.className = "error-window";
-            const positions = [
-                {top:  "40%", left: "15%"},               
-                { top: "15%", left: "10%" },
-                { top: "55%", left: "65%" },
-                { top: "30%", left: "75%" }
-            ];
-
-            win.style.top = positions[i].top;
-            win.style.left = positions[i].left;
-            win.style.zIndex = 10000 + i;
-            win.style.animationDelay = `${i * 0.1}s`;
             
-            const sessionId = Math.random().toString(16).toUpperCase().substring(2, 8);
+            const zone = Math.random() > 0.5 ? 'left' : 'right';
+            let leftPct = zone === 'left' ? Math.random() * 22 + 2 : Math.random() * 22 + 72;
+            let topPct = Math.random() * 65 + 5;
+
+            win.style.left = `${leftPct}%`;
+            win.style.top = `${topPct}%`;
+            win.style.zIndex = `${10000 + activeAlerts}`;
+
             win.innerHTML = `
                 <div class="error-header">
-                    <span>⚠️ CRITICAL_ERROR.EXE</span>
-                    <span>✖</span>
+                    <div class="error-header-left">
+                        <span class="error-header-dot"></span>
+                        <span>${data.title}</span>
+                    </div>
+                    <span style="color:#555">✖</span>
                 </div>
                 <div class="error-body">
-                    <div class="error-alert">ALERTA</div>
-                    <p>INTRUSO DETECTADO</p>
+                    <div class="error-alert">── ALERTA CRÍTICA ──</div>
+                    <p>${data.msg}</p>
                     <div class="error-incident">
-                        INCIDENTE: #${sessionId}<br>
-                        ESTADO: SISTEMA COMPROMETIDO
+                        ID: <span>#${alertId}</span><br>
+                        ${data.detail}
                     </div>
-                    <button class="error-retry" onclick="location.reload()">REINTENTAR</button>
                 </div>
             `;
             overlay.appendChild(win);
+            activeAlerts++;
+
+            setTimeout(() => {
+                win.style.animation = 'alertFadeOut 0.4s ease forwards';
+                setTimeout(() => {
+                    if (overlay.contains(win)) win.remove();
+                    activeAlerts = Math.max(0, activeAlerts - 1);
+                    if (document.body.classList.contains('alarm-active')) {
+                        setTimeout(spawnAlert, 200 + Math.random() * 600);
+                    }
+                }, 400);
+            }, 1800 + Math.random() * 2000);
+        }
+
+        for (let i = 0; i < 4; i++) {
+            setTimeout(() => spawnAlert(), i * 300);
         }
     }
 }
@@ -339,13 +641,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showScreen("mode-selection");
 
-    const btnEjecutar = document.getElementById("execute-btn");
+    document.addEventListener("keydown", (e) => {
+        if(document.getElementById("game-screen").style.display === "flex") {
+            if(e.key === "Enter") handleKeyPress("ENTER");
+            else if(e.key === "Backspace") handleKeyPress("BACKSPACE");
+            else {
+                const key = e.key.toUpperCase();
+                if(/^[A-ZÑ]$/.test(key)) handleKeyPress(key);
+            }
+        }
+    });
+
+    document.querySelectorAll(".key").forEach(btn => {
+        btn.onclick = () => {
+            const k = btn.getAttribute("data-key");
+            if (k === "BACKSPACE" || k === "⌫") handleKeyPress("BACKSPACE");
+            else handleKeyPress(k);
+        };
+    });
+
     const btnAtras = document.getElementById("back-btn");
-    const inputGuess = document.getElementById("user-guess");
-    if (btnEjecutar) btnEjecutar.onclick = procesarIntento;
-    if (btnAtras) btnAtras.onclick = () => location.reload();
-    if (inputGuess) {
-        inputGuess.onkeypress = (e) => { if (e.key === 'Enter') procesarIntento(); };
+    const confirmModal = document.getElementById("confirm-modal");
+    const cancelAbort = document.getElementById("cancel-abort-btn");
+    const confirmAbort = document.getElementById("confirm-abort-btn");
+
+    if (btnAtras) {
+        btnAtras.onclick = () => {
+            if(confirmModal) confirmModal.style.display = "flex";
+        };
+    }
+    if (cancelAbort) {
+        cancelAbort.onclick = () => confirmModal.style.display = "none";
+    }
+    if (confirmAbort) {
+        confirmAbort.onclick = () => location.reload();
     }
 
     const muteBtn = document.getElementById("mute-btn");
@@ -375,4 +704,47 @@ document.addEventListener('click', () => {
 
 window.startGame = startGame;
 window.reiniciarJuego = reiniciarJuego;
+
+function initMatrixLocal() {
+    const container = document.getElementById("wordle-matrix");
+    if (!container) return;
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function spawnTile() {
+        const tile = document.createElement("div");
+        tile.classList.add("matrix-tile");
+
+        const randType = Math.random();
+        if (randType > 0.65) {
+            tile.classList.add('matrix-green');
+        } else if (randType > 0.3) {
+            tile.classList.add('matrix-yellow');
+        } else {
+            tile.classList.add('matrix-grey');
+        }
+
+        tile.textContent = chars[Math.floor(Math.random() * chars.length)];
+        tile.style.left = Math.random() * 100 + "vw";
+
+        const duration = Math.random() * 6 + 6; 
+        tile.style.animationDuration = duration + "s";
+        container.appendChild(tile);
+        
+        const shuffle = setInterval(() => {
+            tile.textContent = chars[Math.floor(Math.random() * chars.length)];
+        }, 300);
+
+        setTimeout(() => {
+            clearInterval(shuffle);
+            if(container.contains(tile)) tile.remove();
+        }, duration * 1000);
+    }
+    
+    setInterval(spawnTile, 250);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initMatrixLocal();
+});
 

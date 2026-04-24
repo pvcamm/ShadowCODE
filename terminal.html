@@ -19,7 +19,8 @@
     /* TÍTULO DINÁMICO CON GLITCH (igual que landing) */
     .mode-screen h1.glitch {
       font-size: 2.6rem; letter-spacing: 6px; text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(135, 30, 215, 0.5);
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(135, 30, 215, 0.4);
       animation: glitch-text 1.2s infinite linear alternate;
     }
 
@@ -29,7 +30,9 @@
     }
 
     .mode-screen .subtitle {
-      font-size: 1.1rem; opacity: 0.75; letter-spacing: 3px; margin-bottom: 40px; color: #aaa;
+      font-size: 1.3rem; opacity: 0.95; letter-spacing: 4px; margin-bottom: 40px; color: #ffffff;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
 
     .mode-grid {
@@ -72,8 +75,15 @@
     .mode-btn.netrunner:hover { background: rgba(255,51,102,0.1); transform: translateY(-5px); box-shadow: 0 5px 25px rgba(255,51,102,0.2); }
 
     /* BOTÓN ABORTAR - HOVER OSCURO/ROJO INTENSO */
+    .abort-bar {
+      margin-top: 60px;
+      margin-bottom: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
     .abort-bar button {
-      margin-top: 70px; background: transparent; border: 1px solid rgba(135, 30, 215, 0.4);
+      background: transparent; border: 1px solid rgba(135, 30, 215, 0.4);
       color: #aaa; padding: 16px 42px; font-size: 1.1rem; border-radius: 4px;
       transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 2px;
       cursor: pointer; font-family: 'Space Grotesk', sans-serif;
@@ -117,10 +127,16 @@
   <!-- Header Navbar Sync -->
   <header>
     <nav>
-      <div class="logo" style="margin-right: auto;"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">Pass</span><span style="color:#d88eff">Wordle</span></div>
+      <div class="logo"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">Pass</span><span style="color:#d88eff">Wordle</span></div>
       <ul class="nav-links">
         <li><a href="index.html#inicio">Ayuda</a></li>
-        <li><a href="index.html" class="play-link" style="padding: 8px 16px;">Ir al Dashboard</a></li>
+        <li><a href="index.html" class="play-link">Dashboard</a></li>
+        <li>
+            <button id="mute-btn" class="btn-audio">
+                <span class="audio-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
+                <span class="audio-text">MUTE</span>
+            </button>
+        </li>
       </ul>
     </nav>
   </header>
@@ -132,8 +148,10 @@
   <!-- === PANTALLA DE SELECCIÓN  === -->
   <div id="mode-selection" class="mode-screen">
     <div class="terminal-title">
-      <h1 class="glitch"data-text="SELECCIONE NIVEL DE INFILTRACIÓN">SELECCIONE NIVEL DE INFILTRACIÓN</h1>
-      <h2 class="subtitle">Elige tu rol. El sistema no perdona errores.</h2>
+      <h1 class="glitch" data-text="SISTEMA PREPARADO PARA INFILTRACIÓN">SISTEMA PREPARADO PARA INFILTRACIÓN</h1>
+      <h2 class="subtitle">
+        <span class="auth-text">SELECCIONE NIVEL DE ACCESO</span>
+      </h2>
     </div>
     
     <div class="menu-buttons">
@@ -264,6 +282,69 @@
       user-select: none;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
+
+    /* Mobile optimizations for game screen */
+    @media (max-width: 900px) {
+      #game-screen {
+        padding: 80px 3% 20px;
+      }
+
+      #game-screen .game-container {
+        max-width: 100%;
+        gap: 20px;
+      }
+
+      /* Larger tiles on mobile */
+      .game-board {
+        gap: 8px;
+        max-width: 100%;
+      }
+      .game-board .tile {
+        width: clamp(45px, 11vw, 65px);
+        height: clamp(45px, 11vw, 65px);
+        font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+        border-width: 2px;
+      }
+
+      /* Larger keyboard on mobile */
+      .keyboard {
+        gap: 10px;
+      }
+      .key-row {
+        gap: 6px;
+      }
+      .key {
+        height: clamp(45px, 6vh, 55px);
+        font-size: clamp(0.85rem, 2.8vw, 1.1rem);
+        border-width: 2px;
+        padding: 0 4px;
+      }
+      .key.wide {
+        font-size: clamp(0.75rem, 2.4vw, 1rem);
+      }
+
+      /* Larger terminal window on mobile */
+      #game-screen .feature-card.window-style {
+        max-width: 100%;
+      }
+      #game-screen .w-body {
+        padding: clamp(15px, 3vh, 25px) 12px !important;
+      }
+
+      /* Larger language badge on mobile */
+      #server-lang-badge {
+        font-size: 0.9rem;
+        letter-spacing: 2.5px;
+        margin-bottom: 8px;
+      }
+
+      /* Larger abort button on mobile */
+      #back-btn {
+        padding: 12px 40px;
+        font-size: 1rem;
+        margin-top: 10px;
+      }
+    }
     .key:hover {
       background: rgba(135, 30, 215, 0.15);
       border-color: rgba(135, 30, 215, 0.8);
@@ -293,6 +374,14 @@
   <!-- === PANTALLA DE JUEGO === -->
   <div id="game-screen">
     <div class="game-container">
+
+      <!-- Language badge above terminal -->
+      <div id="server-lang-badge" style="width:100%; font-family:'Fira Mono',monospace; font-size:0.78rem; color:#ffffff; letter-spacing:2px; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+        <span style="color:#ffffff;">──</span>
+        <span style="color:#ffffff;">SERVER LANG:</span>
+        <span id="server-lang-value" style="color:#00ff88; font-weight:bold; text-shadow:0 0 8px rgba(0,255,136,0.5);">ENGLISH</span>
+        <span style="color:#c72eff; margin-left:auto;">[ SCANNING... ]</span>
+      </div>
 
       <!-- Terminal Window: only the board -->
       <div class="feature-card window-style" style="width: 100%;">

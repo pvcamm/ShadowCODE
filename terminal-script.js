@@ -3,15 +3,18 @@
 const MOODS = {
     easy: { 
         intentos: 6, 
-        palabras: ["DRIVE", "BOARD", "CABLE", "MOUSE", "PANEL", "CHIPS", "TOUCH", "POWER", "RESET", "INPUT", "PRINT", "CLICK", "FILES", "SETUP", "SOUND", "CYBER", "MEDIA", "LOCAL", "ERROR"] 
+        palabrasEN: ["DRIVE", "BOARD", "MOUSE", "PANEL", "CHIPS", "TOUCH", "POWER", "RESET", "INPUT", "PRINT", "CLICK", "FILES", "SETUP", "SOUND", "CYBER", "MEDIA", "LOCAL", "ERROR"],
+        palabrasES: ["PLACA", "DISCO", "MICRO", "MOVIL", "RELOJ", "GAFAS", "RATON", "TECLA", "MOTOR", "LASER", "ROBOT", "RADAR", "DATOS", "CLAVE", "BANDA", "REDES", "AUDIO", "VIDEO", "PIXEL", "TEXTO"]
     },
     medium: { 
         intentos: 6, 
-        palabras: ["ARRAY", "LOGIC", "BUILD", "DEBUG", "TRACE", "STACK", "QUEUE", "SCOPE", "ASYNC", "FETCH", "CONST", "QUERY", "INDEX", "PATCH", "SHELL", "VIRUS", "CHASH", "RETRY"] 
+        palabrasEN: ["ARRAY", "LOGIC", "BUILD", "DEBUG", "TRACE", "STACK", "QUEUE", "SCOPE", "ASYNC", "FETCH", "CONST", "QUERY", "INDEX", "PATCH", "SHELL", "VIRUS", "CHASH", "RETRY"],
+        palabrasES: ["GIGAS", "MEGAS", "TERAS", "BYTES", "VACIO", "NULOS", "FONDO", "FIBRA", "CIBER", "NUBES", "NODOS", "TRAMA", "RUTAS", "PINGS", "RACKS", "EMAIL", "CHATS", "FOROS"]
     },
     hard: { 
         intentos: 6, 
-        palabras: ["PROXY", "CLOUD", "NODES", "PORTS", "ADMIN", "TOOLS", "TOKEN", "CACHE", "LOGIN", "HTTPS", "LINUX", "MODEM", "WIFIS", "VAULT", "ROOTS", "FRAME", "ASTRO", "CHMOD", "CLONE"] 
+        palabrasEN: ["PROXY", "CLOUD", "NODES", "PORTS", "ADMIN", "TOOLS", "TOKEN", "CACHE", "LOGIN", "HTTPS", "LINUX", "MODEM", "WIFIS", "VAULT", "ROOTS", "FRAME", "ASTRO", "CHMOD", "CLONE"],
+        palabrasES: ["VISOR", "FALLO", "GRAFO", "BUSCA", "BORRA", "REGLA", "BUCLE", "CICLO", "CLICS", "SPAMS"]
     }
 };
 
@@ -90,7 +93,11 @@ function playLoadingAnimation() {
 function startGame(diff) {
     modoActual = diff;
     const config = MOODS[diff];
-    palabraSecreta = config.palabras[Math.floor(Math.random() * config.palabras.length)];
+
+    // Randomly pick language for this round
+    const usarEspañol = Math.random() < 0.5;
+    const lista = usarEspañol ? config.palabrasES : config.palabrasEN;
+    palabraSecreta = lista[Math.floor(Math.random() * lista.length)];
     intentosRestantes = config.intentos;
 
     // Remove direct showScreen("game-screen") to let loading sequence act instead
@@ -130,6 +137,20 @@ function startGame(diff) {
 
     const statusElem = document.getElementById("game-status");
     if (statusElem) statusElem.textContent = "Estado: Operando Hackeo";
+
+    // Language indicator
+    const langVal = document.getElementById("server-lang-value");
+    if (langVal) {
+        if (usarEspañol) {
+            langVal.textContent = "ESPAÑOL";
+            langVal.style.color = "#ffcc00";
+            langVal.style.textShadow = "0 0 8px rgba(255,204,0,0.5)";
+        } else {
+            langVal.textContent = "ENGLISH";
+            langVal.style.color = "#00ff88";
+            langVal.style.textShadow = "0 0 8px rgba(0,255,136,0.5)";
+        }
+    }
 
     const oldCanvas = document.getElementById("matrix-canvas");
     if (oldCanvas) {
@@ -298,6 +319,12 @@ function procesarIntentoWordle() {
             startFlashingCursor(currentRow, 0);
         }
     }, delay + 200);
+
+    // Lock immediately if the guess is correct — closes the race window
+    // (gameOver's own lock runs inside the setTimeout above, too late for fast Enter)
+    if (guess === palabraSecreta) {
+        gameIsOver = true;
+    }
 }
 
 function launchHackerConfetti() {
@@ -317,7 +344,7 @@ function launchHackerConfetti() {
         }
         
         conf.style.position = "fixed";
-        conf.style.zIndex = "8000";
+        conf.style.zIndex = "20000"; /* above overlay */
         conf.style.pointerEvents = "none";
         conf.style.width = "25px";
         conf.style.height = "25px";
@@ -354,7 +381,7 @@ function launchHackerConfetti() {
         conf.style.setProperty('--rot', `${rotAmount}deg`);
         
         conf.style.animation = `hack-pop ${3.5 + Math.random()*2.5}s ease-in-out forwards`;
-        document.getElementById("overlay").appendChild(conf);
+        document.body.appendChild(conf);
         
         setTimeout(() => conf.remove(), 6500);
     }
@@ -374,54 +401,57 @@ function gameOver(exito) {
     if (exito) {
         document.body.classList.add("win-active");
 
-        const victoryHTML = `
-            <div class="feature-card window-style" style="width: 100%; max-width: 450px; box-shadow: 0 0 30px rgba(0,255,136,0.1);">
-                <div class="w-header">
-                    <span class="w-title"><span style="color:#00ff88">sys</span><span style="color:#666">@</span><span style="color:#ffcc00">op</span><span style="color:#fff">:~/victory_log</span></span>
-                    <div class="w-controls"><span>_</span><span>□</span><span>✖</span></div>
-                </div>
-                <div class="w-body" style="padding: 25px; display: flex; flex-direction: column; gap: 15px; font-family: 'Fira Mono', monospace;">
-                    <div id="v-line1" style="color: #00ff88; font-weight: bold; font-size: 1.1rem; min-height: 1.5rem; text-shadow: 0 0 8px rgba(0,255,136,0.5);"></div>
-                    <div id="v-line2" style="color: #ffffff; font-size: 0.95rem; min-height: 1.2rem; text-shadow: 0 0 8px rgba(255,255,255,0.4);"></div>
-                    
-                    <!-- Stats Box (Hidden initially) -->
-                    <div id="v-stats" style="display: none; flex-direction: column; gap: 10px; margin-top: 15px; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 4px; border: 1px dashed rgba(0,255,136,0.3); font-size: 0.95rem; text-shadow: 0 0 5px rgba(255,255,255,0.2);">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color:#aaa;">ESTADO:</span><span style="color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.6);">[ COMPROMETIDO ]</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color:#aaa;">RACHA ACTUAL:</span><span style="color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.6);">${rachaActual}x 🔥</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color:#aaa;">RÉCORD UNERG:</span><span style="color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.6);">${rachaMax}x</span>
-                        </div>
-                    </div>
+        const sessionId = Math.random().toString(16).toUpperCase().substring(2, 10);
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-                    <!-- Buttons (Hidden initially) -->
-                    <div id="v-buttons" style="display: none; margin-top: 25px; gap: 10px; justify-content: space-between;">
-                        <button class="key" onclick="reiniciarJuego()" style="font-size: 0.85rem; padding: 12px; border-color: rgba(0,255,136,0.5); color: #00ff88; background: rgba(0,255,136,0.1);">NUEVO ATAQUE</button>
-                        <button class="key" onclick="window.location.reload()" style="font-size: 0.85rem; padding: 12px; border-color: rgba(255,51,102,0.4); color: #ff3366; background: rgba(255,51,102,0.1);">DESCONECTAR</button>
+        const victoryHTML = `
+            <div class="defeat-central" style="border-color: rgba(0,255,136,0.5); box-shadow: 0 0 40px rgba(0,255,136,0.15), 0 0 80px rgba(0,255,136,0.05);">
+                <div class="defeat-terminal-header" style="background: rgba(0,255,136,0.06); border-bottom-color: rgba(0,255,136,0.2);">
+                    <div class="header-title" style="color: #00ff88;">
+                        <span style="background:#00ff88;" class="blink-dot-inline"></span>
+                        ACCESS_GRANTED.EXE
+                    </div>
+                    <div class="defeat-controls"><span>_</span><span>□</span><span>✖</span></div>
+                </div>
+                <div class="defeat-body">
+                    <div class="defeat-code" style="color: #00ff88;">[ STATUS 200 ]</div>
+                    <h2 class="defeat-title" id="v-line1" style="text-shadow: 0 0 20px rgba(0,255,136,0.5); min-height: 2.2rem;"></h2>
+                    <p class="defeat-subtitle" id="v-line2" style="color: rgba(0,255,136,0.8); min-height: 1.4rem;"></p>
+                    <div id="v-stats" class="defeat-log" style="display:none; border-color: rgba(0,255,136,0.2);">
+                        <div class="log-line"><span class="log-key">SESSION:</span><span class="log-val">#${sessionId}</span></div>
+                        <div class="log-line"><span class="log-key">TIMESTAMP:</span><span class="log-val">${timestamp}</span></div>
+                        <div class="log-line"><span class="log-key">ESTADO:</span><span class="log-val" style="color:#00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.5);">SISTEMA COMPROMETIDO</span></div>
+                        <div class="log-line"><span class="log-key">PALABRA:</span><span class="log-val yellow">${palabraSecreta}</span></div>
+                        <div class="log-line"><span class="log-key">RACHA:</span><span class="log-val" style="color:#ffcc00;">${rachaActual}x 🔥  |  RÉCORD: ${rachaMax}x</span></div>
+                    </div>
+                    <div id="v-buttons" class="defeat-actions" style="display:none;">
+                        <button class="btn-defeat-primary" style="color:#00ff88; border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.08);" onclick="reiniciarJuego()">NUEVO ATAQUE</button>
+                        <button class="btn-defeat-primary" style="color:#ff3366; border-color: rgba(255,51,102,0.5); background: rgba(255,51,102,0.08);" onclick="window.location.reload()">DESCONECTAR</button>
                     </div>
                 </div>
             </div>
         `;
         overlay.innerHTML = victoryHTML;
 
-        // Custom typewriter effect for victory log
         const vLines = [
-            { id: "v-line1", text: ">> ACCESO CONCEDIDO.", delay: 400 },
+            { id: "v-line1", text: "ACCESO CONCEDIDO", delay: 400 },
             { id: "v-line2", text: ">> Ejecutando bypass al sistema proxy", dots: 3, delay: 1200 }
         ];
 
         function typeLine(lines, index) {
             if(index >= lines.length) {
                 document.getElementById("v-stats").style.display = "flex";
-                setTimeout(() => document.getElementById("v-buttons").style.display = "flex", 500);
+                document.getElementById("v-stats").style.flexDirection = "column";
+                setTimeout(() => {
+                    const vb = document.getElementById("v-buttons");
+                    if (vb) vb.style.display = "flex";
+                }, 500);
                 setTimeout(() => launchHackerConfetti(), 800);
                 return;
             }
             const data = lines[index];
             const el = document.getElementById(data.id);
+            if (!el) { typeLine(lines, index + 1); return; }
             let charIndex = 0;
             const tInterval = setInterval(() => {
                 el.textContent += data.text[charIndex];
@@ -434,8 +464,7 @@ function gameOver(exito) {
                         setInterval(() => {
                             dotsCount = (dotsCount + 1) % (data.dots + 1);
                             el.textContent = baseText + ".".repeat(dotsCount);
-                        }, 400); // Bucle infinito visual
-                        
+                        }, 400);
                         setTimeout(() => typeLine(lines, index + 1), data.delay);
                     } else {
                         setTimeout(() => typeLine(lines, index + 1), data.delay);
@@ -494,8 +523,11 @@ function gameOver(exito) {
         
         let activeAlerts = 0;
         const maxActive = 4;
-        
+        // On very narrow screens (phones in portrait) there is zero space — skip alerts
+        const canSpawnAlerts = window.innerWidth >= 500;
+
         function spawnAlert() {
+            if (!canSpawnAlerts) return;
             if (!document.body.classList.contains('alarm-active')) return;
             if (activeAlerts >= maxActive) return;
 
@@ -503,10 +535,14 @@ function gameOver(exito) {
             const alertId = Math.random().toString(16).toUpperCase().substring(2, 8);
             
             const win = document.createElement("div");
-            win.className = "error-window";
+            win.className = "error-window decorative-alert";
             
+            // Only spawn in outer zones so they never overlap the central card
             const zone = Math.random() > 0.5 ? 'left' : 'right';
-            let leftPct = zone === 'left' ? Math.random() * 22 + 2 : Math.random() * 22 + 72;
+            // Even more restricted zones for better responsiveness
+            let leftPct = zone === 'left'
+                ? Math.random() * 8 + 1          // 1% – 9%
+                : Math.random() * 8 + 88;       // 88% – 96%
             let topPct = Math.random() * 65 + 5;
 
             win.style.left = `${leftPct}%`;
@@ -530,6 +566,9 @@ function gameOver(exito) {
                     </div>
                 </div>
             `;
+            // Append inside overlay (same stacking context as defeat-central)
+            // z-index 1 keeps them behind defeat-central's z-index 10002
+            win.style.zIndex = "1";
             overlay.appendChild(win);
             activeAlerts++;
 
@@ -642,7 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen("mode-selection");
 
     document.addEventListener("keydown", (e) => {
-        if(document.getElementById("game-screen").style.display === "flex") {
+        const gameScreen = document.getElementById("game-screen");
+        const overlay = document.getElementById("overlay");
+        const overlayVisible = overlay && !overlay.classList.contains("hidden");
+        if (gameScreen.style.display === "flex" && !overlayVisible) {
             if(e.key === "Enter") handleKeyPress("ENTER");
             else if(e.key === "Backspace") handleKeyPress("BACKSPACE");
             else {
@@ -746,5 +788,27 @@ function initMatrixLocal() {
 
 document.addEventListener("DOMContentLoaded", () => {
     initMatrixLocal();
+
+    const muteBtn = document.getElementById("mute-btn");
+    if (muteBtn) {
+        muteBtn.onclick = function() {
+            if (isMuted) {
+                // If it was muted, we play the appropriate music
+                const musicType = document.getElementById("game-screen").style.display === 'flex' ? 'game' : 'menu';
+                bgMusic.src = SOUNDS[musicType];
+                bgMusic.play().catch(e => console.log("Interacción requerida para audio"));
+                isMuted = false;
+                this.classList.add('active');
+                const label = this.querySelector('.audio-text');
+                if (label) label.textContent = 'ON';
+            } else {
+                bgMusic.pause();
+                isMuted = true;
+                this.classList.remove('active');
+                const label = this.querySelector('.audio-text');
+                if (label) label.textContent = 'MUTE';
+            }
+        };
+    }
 });
 
